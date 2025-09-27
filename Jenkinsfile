@@ -9,7 +9,7 @@ pipeline {
 
     parameters {
         choice(name: 'ACTION', choices: ['DEPLOY','ROLLBACK'], description: 'Choose Deploy or Rollback')
-        choice(name: 'BRANCH_NAME', choices: ['feature/AdderClass','QA','main'], description: 'Git branch to deploy from')
+        choice(name: 'BRANCH_NAME', choices: ['feature/dev','QA','main'], description: 'Git branch to deploy from')
         choice(name: 'TARGET_ORG', choices: ['Jenkins1', 'Jenkins2'], description: 'Select target Salesforce Org')
         string(name: 'METADATA', defaultValue: '', description: 'Metadata to deploy (comma separated, e.g., ApexClass:Demo)')
         string(name: 'ROLLBACK_COMMIT', defaultValue: '', description: 'Commit ID to rollback to (required for rollback)')
