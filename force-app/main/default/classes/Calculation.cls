@@ -16,9 +16,5 @@ public class Calculation {
     public Integer divnum(Integer a, Integer b){
         return a/b;
     }
-    //Method 5: add 3 numbers
-    public Integer add3(Integer a, Integer b, Integer c){
-        return a+b+c;
-    }
 
 }

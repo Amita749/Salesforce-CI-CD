@@ -12,12 +12,5 @@ public with sharing class ClassATest {
         // Debug statements are optional
         System.debug('ClassA instance created successfully');
     }
-     @IsTest
-    static void testMethodDev() {
-        ClassA obj = new ClassA();
-        obj.methodDev();
-        System.debug('methodDev executed successfully');
-    }
-
 
 }

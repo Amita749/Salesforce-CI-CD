@@ -47,3 +47,11 @@ $RECYCLE.BIN/
 **/.venv/
 **/venv/
 
+<<<<<<< HEAD
+#ignore this screct file
+force-app/main/default/classes/OneDriveIntegrationCtrl.cls
+force-app/main/default/classes/OneDriveIntegrationCtrlV1.cls
+force-app\main\default\classes\OneDriveIntegrationCtrl.cls-meta.xml
+force-app\main\default\classes\OneDriveIntegrationCtrlV1.cls-meta.xml
+=======
+>>>>>>> feature/dev

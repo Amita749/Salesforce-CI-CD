@@ -1,5 +1,7 @@
-public class MathHelper {
-
+public with sharing class Demo {
+    public Demo() {
+System.debug('this is demo class');
+    }
     // Method 1: Add two numbers
     public Integer add(Integer a, Integer b) {
         return a + b;
@@ -8,11 +10,9 @@ public class MathHelper {
     // Method 2: Subtract two numbers
     public Integer subtract(Integer a, Integer b) {
         return a - b;
-    }
-
+    } 
     // Method 3: Multiply two numbers
-   public Integer multiply(Integer a, Integer b) {
+    public Integer multiply(Integer a, Integer b) {
         return a * b;
     }
-
 }
