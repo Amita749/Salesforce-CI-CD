@@ -63,8 +63,9 @@ pipeline {
                         def existingTests = []
 
                         if (testParam) {
-                            // Query target org for classes that already exist
-                            def queryCmd = "sf data query -q \"SELECT Name FROM ApexClass WHERE Name IN (${testParam.split(',').collect{ \"'${it.trim()}\" }.join(',')})\" --target-org ${params.TARGET_ORG} --json"
+                            // Correctly format test classes for SOQL query
+                            def formattedTests = testParam.split(',').collect { "'${it.trim()}'" }.join(',')
+                            def queryCmd = "sf data query -q \"SELECT Name FROM ApexClass WHERE Name IN (${formattedTests})\" --target-org ${params.TARGET_ORG} --json"
                             def queryResult = bat(returnStdout: true, script: queryCmd).trim()
                             def json = readJSON text: queryResult
                             if (json.result && json.result.records) {
