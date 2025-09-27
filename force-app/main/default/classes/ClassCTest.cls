@@ -6,7 +6,7 @@ public with sharing class ClassCTest {
         String testName = 'Amita';
 
         // Act
-        String result = ClassB.sayHello(testName);
+        String result = ClassC.sayHello(testName);
 
         // Assert
         System.assertEquals('Hello Amita', result, 'sayHello should return a greeting with the name.');
