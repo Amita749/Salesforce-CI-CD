@@ -1,0 +1,23 @@
+<!-- by Jessie Rymph included with unmanaged package Unsubscribe Link from AppExchange & Salesforce Labs.-->
+<!-- April 9, 2021-->
+<!-- The custom controller adds additional text if the organization wants to send a confirmation email.-->
+<!-- The Unsubscribe Link flow finishes at this page.-->
+
+<apex:page controller="jrsl_ul_UnsubscribeController" showHeader="false" applyHtmlTag="true" applyBodyTag="false" standardStylesheets="false" lightningStylesheets="true">
+    <html>
+        <head>
+            <style> html {display : none; } </style>
+            <script>
+            if ( self === top ) {
+                document.documentElement.style.display = 'block';
+            }
+            else {
+                top.location = self.location;
+            }
+            </script>
+        </head><p></p>
+        <apex:pageMessages ></apex:pageMessages>
+        <span style="font-family: Arial Unicode MS; text-align:center; font-size: 14pt;">{!displayText} 
+        </span>
+    </html>
+</apex:page>

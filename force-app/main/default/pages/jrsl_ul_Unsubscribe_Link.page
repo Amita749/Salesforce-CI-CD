@@ -1,0 +1,27 @@
+<!-- by Jessie Rymph included with unmanaged package Unsubscribe Link from AppExchange & Salesforce Labs. Launches flow Unsubscribe Link.-->
+<!-- April 9, 2021-->
+
+<apex:page showheader="false" lightningStylesheets="true">
+                <apex:slds />
+    <div class="slds-scope">
+
+        <html>
+        <head>
+            <style> html {display : none; } </style>
+            <script>
+            if ( self === top ) {
+                document.documentElement.style.display = 'block';
+            }
+            else {
+                top.location = self.location;
+            }
+            </script>
+        </head>
+            </html>
+        
+        <flow:interview name="jrsl_ul_Unsubscribe_Link" finishLocation="{!$Page.jrsl_ul_UnsubscribeFinish}"/>
+
+        </div>
+
+        
+</apex:page>
