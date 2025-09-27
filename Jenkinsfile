@@ -73,7 +73,7 @@ pipeline {
                             }
                         }
 
-                        def testLevel = "RunLocalTests"
+                        def testLevel = "NoTestRun"
                         def testFlag = ""
                         if (existingTests && !existingTests.isEmpty()) {
                             testLevel = "RunSpecifiedTests"
