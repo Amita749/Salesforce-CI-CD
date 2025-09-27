@@ -46,3 +46,7 @@ $RECYCLE.BIN/
 **/__pycache__/
 **/.venv/
 **/venv/
+
+#ignore this screct file
+force-app/main/default/classes/OneDriveIntegrationCtrl.cls
+force-app/main/default/classes/OneDriveIntegrationCtrlV1.cls
