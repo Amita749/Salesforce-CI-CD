@@ -106,6 +106,7 @@ stage('Archive and Publish Test Results') {
         junit 'test-results/**/*.xml'
     }
 }
+    }
 
 
     post {
