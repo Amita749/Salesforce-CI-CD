@@ -84,7 +84,7 @@ pipeline {
                 error("Stopping pipeline because validation failed")
             } else {
                 echo "✅ Validation passed, deploying..."
-                bat "sf project deploy start --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel} --ignore-conflicts --on-error rollback"
+                bat "sf project deploy start --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel} --ignore-conflicts"
                 currentBuild.description = "Deployment successful"
             }
         }
