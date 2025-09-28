@@ -4,7 +4,7 @@ pipeline {
     environment {
         JWT_KEY   = credentials('sf_jwt_key')
         SFDC_HOST = 'https://test.salesforce.com'
-        GIT_URL   = 'https://github.com/Amita749/Jenkins_Pipeline.git'
+        GIT_URL   = 'https://github.com/Amita749/Salesforce-CI-CD.git'
     }
 
     parameters {
