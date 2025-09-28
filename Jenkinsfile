@@ -19,14 +19,15 @@ pipeline {
 
 
     stages {
+     stage('Clean Workspace') {
+            steps { deleteDir() }
+        }
 
+        
         stage('Checkout') {
             steps { git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}" }
         }
 
-        stage('Clean Workspace') {
-            steps { deleteDir() }
-        }
 
         stage('Auth Org') {
             steps {
