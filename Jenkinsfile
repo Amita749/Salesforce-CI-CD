@@ -18,6 +18,12 @@ pipeline {
 
     stages {
 
+        stage('Clean Workspace') {
+            steps {
+                deleteDir() // ensures no leftover files from previous runs
+            }
+        }
+
         stage('Prepare Code') {
             steps {
                 script {
@@ -30,6 +36,9 @@ pipeline {
                         bat "git checkout ${params.ROLLBACK_COMMIT}"
                     } else {
                         git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}"
+                        // ensure workspace matches remote
+                        bat "git fetch origin"
+                        bat "git reset --hard origin/${params.BRANCH_NAME}"
                     }
                 }
             }
@@ -45,6 +54,8 @@ pipeline {
                     def creds = credsMap[params.TARGET_ORG]
                     withCredentials([string(credentialsId: creds.consumerCredId, variable: 'CONSUMER_KEY')]) {
                         bat "sf auth jwt grant --client-id %CONSUMER_KEY% --jwt-key-file \"%JWT_KEY%\" --username ${creds.user} --instance-url ${SFDC_HOST} --alias ${params.TARGET_ORG}"
+                        // verify org auth
+                        bat "sf org list"
                     }
                 }
             }
@@ -62,6 +73,7 @@ pipeline {
                             .join(',')
                         if (testClasses) metadataList += ",${testClasses}"
                     }
+                    // generate manifest
                     bat "sf project generate manifest --metadata \"${metadataList}\" --output-dir manifest"
                 }
             }
@@ -70,30 +82,26 @@ pipeline {
         stage('Validate and Deploy') {
             steps {
                 script {
+                    def manifestPath = "${WORKSPACE}/manifest/package.xml"
                     def testParam = params.TEST_CLASSES?.trim()
-def testLevel = ""
+                    def testLevel = testParam ? "--test-level RunSpecifiedTests --tests ${testParam}" : "--test-level RunLocalTests"
 
-if (testParam) {
-    testLevel = "--test-level RunSpecifiedTests --tests ${testParam}"
-} else {
-    // run local tests if no test classes provided
-    testLevel = "--test-level RunLocalTests"
-}
+                    echo "🔹 Validating deployment..."
+                    def validate = bat(returnStatus: true, script: "sf project deploy validate --manifest ${manifestPath} --target-org ${params.TARGET_ORG} ${testLevel}")
 
-                    def validate = bat(returnStatus: true, script: "sf project deploy validate --manifest manifest\\package.xml --target-org ${params.TARGET_ORG} ${testLevel}")
-                    
                     if (validate != 0) {
                         echo "❌ Validation failed. No changes were deployed."
                         currentBuild.description = "Validation failed"
                         error("Stopping pipeline because validation failed")
                     } else {
                         echo "✅ Validation passed, deploying..."
-                        bat "sf project deploy start --manifest manifest\\package.xml --target-org ${params.TARGET_ORG} ${testLevel}"
+                        bat "sf project deploy start --manifest ${manifestPath} --target-org ${params.TARGET_ORG} ${testLevel}"
                         currentBuild.description = (params.ACTION == 'ROLLBACK') ? "Rollback deployed" : "Deployment successful"
                     }
                 }
             }
         }
+
     }
 
     post {
