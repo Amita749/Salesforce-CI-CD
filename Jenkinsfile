@@ -17,9 +17,21 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps { 
-                git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}" 
+
+        stage('Prepare Code') {
+            steps {
+                script {
+                    if (params.ACTION == 'ROLLBACK') {
+                        if (!params.ROLLBACK_COMMIT?.trim()) {
+                            error("ROLLBACK_COMMIT is required for rollback!")
+                        }
+                        echo "🔄 Rolling back to commit: ${params.ROLLBACK_COMMIT}"
+                        bat "git fetch origin"
+                        bat "git checkout ${params.ROLLBACK_COMMIT}"
+                    } else {
+                        git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}"
+                    }
+                }
             }
         }
 
@@ -41,22 +53,15 @@ pipeline {
         stage('Prepare Manifest') {
             steps {
                 script {
-                    // Start with main metadata class
                     def metadataList = "ApexClass:${params.METADATA}"
-
-                    // Add test classes only if they exist
                     if (params.TEST_CLASSES?.trim()) {
                         def testClasses = params.TEST_CLASSES.split(',')
-                            .collect { it.trim() }              // remove extra spaces
-                            .findAll { it }                     // remove empty strings
-                            .collect { "ApexClass:${it}" }     // prefix each test class
+                            .collect { it.trim() }
+                            .findAll { it }
+                            .collect { "ApexClass:${it}" }
                             .join(',')
-                        if (testClasses) {
-                            metadataList += ",${testClasses}"
-                        }
+                        if (testClasses) metadataList += ",${testClasses}"
                     }
-
-                    // Generate manifest safely
                     bat "sf project generate manifest --metadata \"${metadataList}\" --output-dir manifest"
                 }
             }
@@ -65,20 +70,30 @@ pipeline {
         stage('Validate and Deploy') {
             steps {
                 script {
-                    // Prepare test class param, safe for empty
-                    def testParam = params.TEST_CLASSES?.trim() ?: ""
-                    
-                    def validate = bat(returnStatus: true, script: "sf project deploy validate --manifest manifest\\package.xml --target-org ${params.TARGET_ORG} --test-level RunSpecifiedTests --tests ${testParam}")
+                    def testParam = params.TEST_CLASSES?.trim()
+                    def testLevel = ""
+
+                    if (testParam) {
+                        testLevel = "--test-level RunSpecifiedTests --tests ${testParam}"
+                    } else {
+                        // if no test classes provided
+                        if (params.TARGET_ORG == "Jenkins1" || params.TARGET_ORG == "Jenkins2") {
+                            testLevel = "--test-level NoTestRun"  // sandbox only
+                        } else {
+                            testLevel = "--test-level RunLocalTests" // prod safety
+                        }
+                    }
+
+                    def validate = bat(returnStatus: true, script: "sf project deploy validate --manifest manifest\\package.xml --target-org ${params.TARGET_ORG} ${testLevel}")
                     
                     if (validate != 0) {
-                         echo "❌ Validation failed. No changes were deployed to org."
-                currentBuild.description = "Validation failed - no deployment"
-                error("Stopping pipeline because validation failed")
-                    } 
-                    else {
+                        echo "❌ Validation failed. No changes were deployed."
+                        currentBuild.description = "Validation failed"
+                        error("Stopping pipeline because validation failed")
+                    } else {
                         echo "✅ Validation passed, deploying..."
-                        bat "sf project deploy start --manifest manifest\\package.xml --target-org ${params.TARGET_ORG} --test-level RunSpecifiedTests --tests ${testParam}"
-                        currentBuild.description = "Deployment successful"
+                        bat "sf project deploy start --manifest manifest\\package.xml --target-org ${params.TARGET_ORG} ${testLevel}"
+                        currentBuild.description = (params.ACTION == 'ROLLBACK') ? "Rollback deployed" : "Deployment successful"
                     }
                 }
             }
