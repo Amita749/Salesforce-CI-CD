@@ -68,7 +68,7 @@ pipeline {
         }
 
 
-       stage('Validate and Deploy') {
+      stage('Validate and Deploy') {
     steps {
         script {
             def manifestPath = "${WORKSPACE}\\manifest\\package.xml"
@@ -78,7 +78,7 @@ pipeline {
             // Validate deployment with JUnit output
             echo "🔹 Validating deployment..."
             def validate = bat(returnStatus: true, script: """
-                sf project deploy validate --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel} --result-format junit --output-dir test-results
+                sf project deploy start --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel} --dry-run --result-format junit --output-dir test-results
             """)
 
             if (validate != 0) {
@@ -106,6 +106,7 @@ stage('Archive and Publish Test Results') {
         junit 'test-results/**/*.xml'
     }
 }
+
     }
 
 
