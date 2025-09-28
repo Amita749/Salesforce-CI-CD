@@ -71,35 +71,42 @@ pipeline {
        stage('Validate and Deploy') {
     steps {
         script {
-            def manifestPath = "${WORKSPACE}\\manifest\\package.xml" // Use backslashes for Windows
+            def manifestPath = "${WORKSPACE}\\manifest\\package.xml"
             def testParam = params.TEST_CLASSES?.trim()
             def testLevel = testParam ? "--test-level RunSpecifiedTests --tests ${testParam}" : "--test-level RunLocalTests"
 
+            // Validate deployment with JUnit output
             echo "🔹 Validating deployment..."
-            def validate = bat(returnStatus: true, script: "sf project deploy validate --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel}")
+            def validate = bat(returnStatus: true, script: """
+                sf project deploy validate --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel} --result-format junit --output-dir test-results
+            """)
 
             if (validate != 0) {
                 echo "❌ Validation failed. No changes were deployed."
                 currentBuild.description = "Validation failed"
                 error("Stopping pipeline because validation failed")
-            } else {
-                echo "✅ Validation passed, deploying..."
-                bat "sf project deploy start --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel} --ignore-conflicts"
-                currentBuild.description = "Deployment successful"
             }
+
+            // Deploy if validation passed
+            echo "✅ Validation passed, deploying..."
+            bat """
+                sf project deploy start --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel} --ignore-conflicts --result-format junit --output-dir test-results
+            """
+            currentBuild.description = "Deployment successful"
         }
     }
 }
 
+stage('Archive and Publish Test Results') {
+    steps {
+        echo "🔹 Archiving raw test results..."
+        archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
 
-        stage('Archive Test Results') {
-            steps {
-                echo "🔹 Archiving test results..."
-                archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
-            }
-        }
-
+        echo "🔹 Publishing JUnit test results..."
+        junit 'test-results/**/*.xml'
     }
+}
+
 
     post {
         always {
