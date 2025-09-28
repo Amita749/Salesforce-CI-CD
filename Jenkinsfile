@@ -7,7 +7,8 @@ pipeline {
         GIT_URL   = 'https://github.com/Amita749/Salesforce-CI-CD.git'
     }
 
-    parameters {
+
+   parameters {
         choice(name: 'ACTION', choices: ['DEPLOY','ROLLBACK'], description: 'Choose Deploy or Rollback')
         choice(name: 'BRANCH_NAME', choices: ['feature/dev','feature/new','QA','main'], description: 'Git branch to deploy from')
         choice(name: 'TARGET_ORG', choices: ['Jenkins1', 'Jenkins2'], description: 'Select target Salesforce Org')
@@ -16,32 +17,15 @@ pipeline {
         string(name: 'TEST_CLASSES', defaultValue: '', description: 'Comma-separated Apex test classes to run (optional)')
     }
 
+
     stages {
 
-        stage('Clean Workspace') {
-            steps {
-                deleteDir() // ensures no leftover files from previous runs
-            }
+        stage('Checkout') {
+            steps { git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}" }
         }
 
-        stage('Prepare Code') {
-            steps {
-                script {
-                    if (params.ACTION == 'ROLLBACK') {
-                        if (!params.ROLLBACK_COMMIT?.trim()) {
-                            error("ROLLBACK_COMMIT is required for rollback!")
-                        }
-                        echo "🔄 Rolling back to commit: ${params.ROLLBACK_COMMIT}"
-                        bat "git fetch origin"
-                        bat "git checkout ${params.ROLLBACK_COMMIT}"
-                    } else {
-                        git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}"
-                        // ensure workspace matches remote
-                        bat "git fetch origin"
-                        bat "git reset --hard origin/${params.BRANCH_NAME}"
-                    }
-                }
-            }
+        stage('Clean Workspace') {
+            steps { deleteDir() }
         }
 
         stage('Auth Org') {
@@ -54,8 +38,6 @@ pipeline {
                     def creds = credsMap[params.TARGET_ORG]
                     withCredentials([string(credentialsId: creds.consumerCredId, variable: 'CONSUMER_KEY')]) {
                         bat "sf auth jwt grant --client-id %CONSUMER_KEY% --jwt-key-file \"%JWT_KEY%\" --username ${creds.user} --instance-url ${SFDC_HOST} --alias ${params.TARGET_ORG}"
-                        // verify org auth
-                        bat "sf org list"
                     }
                 }
             }
@@ -63,19 +45,7 @@ pipeline {
 
         stage('Prepare Manifest') {
             steps {
-                script {
-                    def metadataList = "ApexClass:${params.METADATA}"
-                    if (params.TEST_CLASSES?.trim()) {
-                        def testClasses = params.TEST_CLASSES.split(',')
-                            .collect { it.trim() }
-                            .findAll { it }
-                            .collect { "ApexClass:${it}" }
-                            .join(',')
-                        if (testClasses) metadataList += ",${testClasses}"
-                    }
-                    // generate manifest
-                    bat "sf project generate manifest --metadata \"${metadataList}\" --output-dir manifest"
-                }
+                bat "sf project generate manifest --metadata \"ApexClass:${params.MAIN_CLASS},${params.TEST_CLASSES.replaceAll(',',',ApexClass:')}\" --output-dir manifest"
             }
         }
 
@@ -95,10 +65,18 @@ pipeline {
                         error("Stopping pipeline because validation failed")
                     } else {
                         echo "✅ Validation passed, deploying..."
-                        bat "sf project deploy start --manifest ${manifestPath} --target-org ${params.TARGET_ORG} ${testLevel}"
-                        currentBuild.description = (params.ACTION == 'ROLLBACK') ? "Rollback deployed" : "Deployment successful"
+                        // Minimal added flags
+                        bat "sf project deploy start --manifest ${manifestPath} --target-org ${params.TARGET_ORG} ${testLevel} --ignore-conflicts --on-error rollback"
+                        currentBuild.description = "Deployment successful"
                     }
                 }
+            }
+        }
+
+        stage('Archive Test Results') {
+            steps {
+                echo "🔹 Archiving test results..."
+                archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
             }
         }
 
