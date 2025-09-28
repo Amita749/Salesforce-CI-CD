@@ -4,24 +4,30 @@ pipeline {
     environment {
         JWT_KEY   = credentials('sf_jwt_key')
         SFDC_HOST = 'https://test.salesforce.com'
-        GIT_URL   = 'https://github.com/Amita749/Jenkins_Pipeline.git'
+        GIT_URL   = 'https://github.com/Amita749/Salesforce-CI-CD.git'
     }
 
-    parameters {
+
+   parameters {
         choice(name: 'ACTION', choices: ['DEPLOY','ROLLBACK'], description: 'Choose Deploy or Rollback')
-        choice(name: 'BRANCH_NAME', choices: ['feature/dev','QA','main'], description: 'Git branch to deploy from')
+        choice(name: 'BRANCH_NAME', choices: ['feature/dev','feature/new','QA','main'], description: 'Git branch to deploy from')
         choice(name: 'TARGET_ORG', choices: ['Jenkins1', 'Jenkins2'], description: 'Select target Salesforce Org')
         string(name: 'METADATA', defaultValue: '', description: 'Metadata to deploy (comma separated, e.g., ApexClass:Demo)')
         string(name: 'ROLLBACK_COMMIT', defaultValue: '', description: 'Commit ID to rollback to (required for rollback)')
         string(name: 'TEST_CLASSES', defaultValue: '', description: 'Comma-separated Apex test classes to run (optional)')
     }
 
+
     stages {
-        stage('Checkout') {
-            steps { 
-                git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}" 
-            }
+     stage('Clean Workspace') {
+            steps { deleteDir() }
         }
+
+
+        stage('Checkout') {
+            steps { git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}" }
+        }
+
 
         stage('Auth Org') {
             steps {
@@ -38,12 +44,11 @@ pipeline {
             }
         }
 
-        stage('Prepare Manifest') {
+       stage('Prepare Manifest') {
             steps {
                 script {
                     // Start with main metadata class
                     def metadataList = "ApexClass:${params.METADATA}"
-
                     // Add test classes only if they exist
                     if (params.TEST_CLASSES?.trim()) {
                         def testClasses = params.TEST_CLASSES.split(',')
@@ -62,27 +67,38 @@ pipeline {
             }
         }
 
-        stage('Validate and Deploy') {
-            steps {
-                script {
-                    // Prepare test class param, safe for empty
-                    def testParam = params.TEST_CLASSES?.trim() ?: ""
-                    
-                    def validate = bat(returnStatus: true, script: "sf project deploy validate --manifest manifest\\package.xml --target-org ${params.TARGET_ORG} --test-level RunSpecifiedTests --tests ${testParam}")
-                    
-                    if (validate != 0) {
-                         echo "❌ Validation failed. No changes were deployed to org."
-                currentBuild.description = "Validation failed - no deployment"
+
+       stage('Validate and Deploy') {
+    steps {
+        script {
+            def manifestPath = "${WORKSPACE}\\manifest\\package.xml" // Use backslashes for Windows
+            def testParam = params.TEST_CLASSES?.trim()
+            def testLevel = testParam ? "--test-level RunSpecifiedTests --tests ${testParam}" : "--test-level RunLocalTests"
+
+            echo "🔹 Validating deployment..."
+            def validate = bat(returnStatus: true, script: "sf project deploy validate --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel}")
+
+            if (validate != 0) {
+                echo "❌ Validation failed. No changes were deployed."
+                currentBuild.description = "Validation failed"
                 error("Stopping pipeline because validation failed")
-                    } 
-                    else {
-                        echo "✅ Validation passed, deploying..."
-                        bat "sf project deploy start --manifest manifest\\package.xml --target-org ${params.TARGET_ORG} --test-level RunSpecifiedTests --tests ${testParam}"
-                        currentBuild.description = "Deployment successful"
-                    }
-                }
+            } else {
+                echo "✅ Validation passed, deploying..."
+                bat "sf project deploy start --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel} --ignore-conflicts --on-error rollback"
+                currentBuild.description = "Deployment successful"
             }
         }
+    }
+}
+
+
+        stage('Archive Test Results') {
+            steps {
+                echo "🔹 Archiving test results..."
+                archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
+            }
+        }
+
     }
 
     post {
