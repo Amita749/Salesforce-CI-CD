@@ -71,18 +71,14 @@ pipeline {
             steps {
                 script {
                     def testParam = params.TEST_CLASSES?.trim()
-                    def testLevel = ""
+def testLevel = ""
 
-                    if (testParam) {
-                        testLevel = "--test-level RunSpecifiedTests --tests ${testParam}"
-                    } else {
-                        // if no test classes provided
-                        if (params.TARGET_ORG == "Jenkins1" || params.TARGET_ORG == "Jenkins2") {
-                            testLevel = "--test-level NoTestRun"  // sandbox only
-                        } else {
-                            testLevel = "--test-level RunLocalTests" // prod safety
-                        }
-                    }
+if (testParam) {
+    testLevel = "--test-level RunSpecifiedTests --tests ${testParam}"
+} else {
+    // run local tests if no test classes provided
+    testLevel = "--test-level RunLocalTests"
+}
 
                     def validate = bat(returnStatus: true, script: "sf project deploy validate --manifest manifest\\package.xml --target-org ${params.TARGET_ORG} ${testLevel}")
                     
