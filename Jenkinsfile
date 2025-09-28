@@ -43,11 +43,29 @@ pipeline {
             }
         }
 
-        stage('Prepare Manifest') {
+       stage('Prepare Manifest') {
             steps {
-                bat "sf project generate manifest --metadata \"ApexClass:${params.MAIN_CLASS},${params.TEST_CLASSES.replaceAll(',',',ApexClass:')}\" --output-dir manifest"
+                script {
+                    // Start with main metadata class
+                    def metadataList = "ApexClass:${params.METADATA}"
+                    // Add test classes only if they exist
+                    if (params.TEST_CLASSES?.trim()) {
+                        def testClasses = params.TEST_CLASSES.split(',')
+                            .collect { it.trim() }              // remove extra spaces
+                            .findAll { it }                     // remove empty strings
+                            .collect { "ApexClass:${it}" }     // prefix each test class
+                            .join(',')
+                        if (testClasses) {
+                            metadataList += ",${testClasses}"
+                        }
+                    }
+
+                    // Generate manifest safely
+                    bat "sf project generate manifest --metadata \"${metadataList}\" --output-dir manifest"
+                }
             }
         }
+
 
         stage('Validate and Deploy') {
             steps {
