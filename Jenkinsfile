@@ -23,7 +23,7 @@ pipeline {
             steps { deleteDir() }
         }
 
-        
+
         stage('Checkout') {
             steps { git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}" }
         }
@@ -68,29 +68,29 @@ pipeline {
         }
 
 
-        stage('Validate and Deploy') {
-            steps {
-                script {
-                    def manifestPath = "${WORKSPACE}/manifest/package.xml"
-                    def testParam = params.TEST_CLASSES?.trim()
-                    def testLevel = testParam ? "--test-level RunSpecifiedTests --tests ${testParam}" : "--test-level RunLocalTests"
+       stage('Validate and Deploy') {
+    steps {
+        script {
+            def manifestPath = "${WORKSPACE}\\manifest\\package.xml" // Use backslashes for Windows
+            def testParam = params.TEST_CLASSES?.trim()
+            def testLevel = testParam ? "--test-level RunSpecifiedTests --tests ${testParam}" : "--test-level RunLocalTests"
 
-                    echo "🔹 Validating deployment..."
-                    def validate = bat(returnStatus: true, script: "sf project deploy validate --manifest ${manifestPath} --target-org ${params.TARGET_ORG} ${testLevel}")
+            echo "🔹 Validating deployment..."
+            def validate = bat(returnStatus: true, script: "sf project deploy validate --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel}")
 
-                    if (validate != 0) {
-                        echo "❌ Validation failed. No changes were deployed."
-                        currentBuild.description = "Validation failed"
-                        error("Stopping pipeline because validation failed")
-                    } else {
-                        echo "✅ Validation passed, deploying..."
-                        // Minimal added flags
-                        bat "sf project deploy start --manifest ${manifestPath} --target-org ${params.TARGET_ORG} ${testLevel} --ignore-conflicts --on-error rollback"
-                        currentBuild.description = "Deployment successful"
-                    }
-                }
+            if (validate != 0) {
+                echo "❌ Validation failed. No changes were deployed."
+                currentBuild.description = "Validation failed"
+                error("Stopping pipeline because validation failed")
+            } else {
+                echo "✅ Validation passed, deploying..."
+                bat "sf project deploy start --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel} --ignore-conflicts --on-error rollback"
+                currentBuild.description = "Deployment successful"
             }
         }
+    }
+}
+
 
         stage('Archive Test Results') {
             steps {
