@@ -21,6 +21,12 @@ pipeline {
             steps { deleteDir() }
         }
 
+stage('Check CLI') {
+    steps {
+        bat 'sf --version'
+    }
+}
+
         stage('Checkout') {
             steps { git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}" }
         }
