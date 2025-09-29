@@ -16,8 +16,8 @@ public with sharing class DemoHandlerTest {
         System.assertEquals(60, result, '100-40 should equal 60');
     }
      @IsTest
-    public static void testmul() {
-        Integer result = DemoHandler.mulNum(5,10);
-        System.assertEquals(50, result, '5*10 should equal 50');
+    public static void testdiv() {
+        Integer result = DemoHandler.divNum(50,10);
+        System.assertEquals(5, result, '5 should equal 5');
     }
 }
