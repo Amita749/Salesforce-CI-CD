@@ -6,6 +6,6 @@ public with sharing class DemoHandler {
      return a+b+c+d;
     }
         public static Integer subNum(Integer a, Integer b) {
-     return a+b;
+     return a-b;
     }
 }
