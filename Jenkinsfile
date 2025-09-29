@@ -123,13 +123,42 @@ stage('Check CLI') {
             echo "🔹 Action Description: ${currentBuild.description}"
             // Send email notification
         emailext(
-            subject: "Jenkins Build ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
-            body: """<p>Build ${currentBuild.fullDisplayName} finished with status: <b>${currentBuild.currentResult}</b></p>
-                     <p>Action Description: ${currentBuild.description}</p>
-                     <p>See build details: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
-            to: "amita.chaudhary@dynpro.com" ,
-            attachmentsPattern: 'test-results/*.txt'  
-        )
+    subject: "Jenkins Build ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
+    body: """
+    <html>
+    <body>
+        <h3>Jenkins Build Notification</h3>
+        <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+            <tr>
+                <th align="left">Job Name</th>
+                <td>${env.JOB_NAME}</td>
+            </tr>
+            <tr>
+                <th align="left">Build Number</th>
+                <td>${env.BUILD_NUMBER}</td>
+            </tr>
+            <tr>
+                <th align="left">Status</th>
+                <td><b>${currentBuild.currentResult}</b></td>
+            </tr>
+            <tr>
+                <th align="left">Action Description</th>
+                <td>${currentBuild.description}</td>
+            </tr>
+            <tr>
+                <th align="left">Build URL</th>
+                <td><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></td>
+            </tr>
+        </table>
+        <p>Regards,<br/>Jenkins CI/CD</p>
+    </body>
+    </html>
+    """,
+    mimeType: 'text/html',
+    to: "amita.chaudhary@dynpro.com",
+    attachmentsPattern: 'test-results/*.txt'  // optional, attach your artifacts
+             )
+
         }
         
     }
