@@ -22,14 +22,7 @@ pipeline {
      stage('Clean Workspace') {
             steps { deleteDir() }
         }
-        stage('Install Salesforce CLI') {
-            steps {
-                bat '''
-                    npm install --global @salesforce/cli
-                    sf --version
-                '''
-            }
-        }
+
 
         stage('Checkout') {
             steps { git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}" }
@@ -75,7 +68,7 @@ pipeline {
         }
 
 
-   stage('Validate and Deploy') {
+       stage('Validate and Deploy') {
     steps {
         script {
             def manifestPath = "${WORKSPACE}\\manifest\\package.xml" // Use backslashes for Windows
@@ -91,7 +84,7 @@ pipeline {
                 error("Stopping pipeline because validation failed")
             } else {
                 echo "✅ Validation passed, deploying..."
-                bat "sf project deploy start --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel}"
+                bat "sf project deploy start --manifest \"${manifestPath}\" --target-org ${params.TARGET_ORG} ${testLevel} --ignore-conflicts"
                 currentBuild.description = "Deployment successful"
             }
         }
@@ -107,8 +100,6 @@ pipeline {
         }
 
     }
-
-
 
     post {
         always {
