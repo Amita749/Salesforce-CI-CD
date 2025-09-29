@@ -8,4 +8,7 @@ public with sharing class DemoHandler {
         public static Integer subNum(Integer a, Integer b) {
      return a-b;
     }
+     public static Integer mulNum(Integer a, Integer b) {
+     return a*b;
+    }
 }
