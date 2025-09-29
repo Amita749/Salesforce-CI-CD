@@ -23,6 +23,8 @@ pipeline {
 
 stage('Check CLI') {
     steps {
+         echo "🔹 Updating Salesforce CLI..."
+        bat 'sf update'
         bat 'sf --version'
     }
 }
