@@ -24,7 +24,6 @@ pipeline {
 stage('Check CLI') {
     steps {
          echo "🔹 Updating Salesforce CLI..."
-        bat 'sf update'
         bat 'sf --version'
     }
 }
@@ -74,21 +73,36 @@ stage('Check CLI') {
                     def testParam = params.TEST_CLASSES?.trim()
                     def testLevel = testParam ? "--test-level RunSpecifiedTests --tests ${testParam}" : "--test-level RunLocalTests"
 
+                    // Ensure test-results folder exists
+                    bat 'mkdir test-results || exit 0'
+
                     echo "🔹 Validating deployment..."
-                    def validate = bat(returnStatus: true, script: """
-                        sf project deploy validate --manifest "${manifestPath}" --target-org ${params.TARGET_ORG} ${testLevel} --result-format junit --output-dir test-results
+                    def validateStatus = bat(returnStatus: true, script: """
+                        sf project deploy validate --manifest "${manifestPath}" --target-org ${TARGET_ORG} ${testLevel} > test-results\\validate-output.txt
                     """)
 
-                    if (validate != 0) {
-                        echo "❌ Validation failed. No changes were deployed."
+                    archiveArtifacts artifacts: 'test-results/validate-output.txt', allowEmptyArchive: false
+
+                    if (validateStatus != 0) {
+                        echo "❌ Validation failed."
                         currentBuild.description = "Validation failed"
                         error("Stopping pipeline because validation failed")
                     } else {
                         echo "✅ Validation passed, deploying..."
-                        bat """
-                            sf project deploy start --manifest "${manifestPath}" --target-org ${params.TARGET_ORG} ${testLevel} --ignore-conflicts --result-format junit --output-dir test-results
-                        """
-                        currentBuild.description = "Deployment successful"
+                        def deployStatus = bat(returnStatus: true, script: """
+                            sf project deploy start --manifest "${manifestPath}" --target-org ${TARGET_ORG} ${testLevel} --ignore-conflicts > test-results\\deploy-output.txt
+                        """)
+
+                        archiveArtifacts artifacts: 'test-results/deploy-output.txt', allowEmptyArchive: false
+
+                        if (deployStatus != 0) {
+                            echo "❌ Deployment failed."
+                            currentBuild.description = "Deployment failed"
+                            error("Deployment failed")
+                        } else {
+                            echo "✅ Deployment successful"
+                            currentBuild.description = "Deployment successful"
+                        }
                     }
                 }
             }
@@ -98,9 +112,9 @@ stage('Check CLI') {
             steps {
                 echo "🔹 Archiving test results..."
                 archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
-                junit allowEmptyResults: true, testResults: 'test-results/*.xml'
             }
         }
+
     }
 
     post {
