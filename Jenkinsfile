@@ -22,7 +22,14 @@ pipeline {
      stage('Clean Workspace') {
             steps { deleteDir() }
         }
-
+        stage('Install Salesforce CLI') {
+            steps {
+                bat '''
+                    npm install --global @salesforce/cli
+                    sf --version
+                '''
+            }
+        }
 
         stage('Checkout') {
             steps { git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}" }
