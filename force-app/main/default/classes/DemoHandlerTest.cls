@@ -10,4 +10,9 @@ public with sharing class DemoHandlerTest {
         Integer result = DemoHandler.addNum(5, 10, 15,20);
         System.assertEquals(50, result, '5 + 10 + 15 +20 should equal 50');
     }
+     @IsTest
+    public static void testsub() {
+        Integer result = DemoHandler.subNum(100,40);
+        System.assertEquals(60, result, '100-40 should equal 60');
+    }
 }
