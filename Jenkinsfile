@@ -90,7 +90,7 @@ stage('Check CLI') {
                     } else {
                         echo "✅ Validation passed, deploying..."
                         def deployStatus = bat(returnStatus: true, script: """
-                            sf project deploy start --manifest "${manifestPath}" --target-org ${TARGET_ORG} ${testLevel} > test-results\\deploy-output.txt
+                            sf project deploy start --manifest "${manifestPath}" --target-org ${TARGET_ORG} ${testLevel} --ignore-conflicts  > test-results\\deploy-output.txt
                         """)
 
                         archiveArtifacts artifacts: 'test-results/deploy-output.txt', allowEmptyArchive: false
