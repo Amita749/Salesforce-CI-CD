@@ -121,6 +121,16 @@ stage('Check CLI') {
         always {
             echo "🔹 Build Status: ${currentBuild.currentResult}"
             echo "🔹 Action Description: ${currentBuild.description}"
+            // Send email notification
+        emailext(
+            subject: "Jenkins Build ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
+            body: """<p>Build ${currentBuild.fullDisplayName} finished with status: <b>${currentBuild.currentResult}</b></p>
+                     <p>Action Description: ${currentBuild.description}</p>
+                     <p>See build details: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
+            to: "amita.chaudhary@dynpro.com" 
+            attachmentsPattern: 'test-results/*.txt'  
+        )
         }
+        
     }
 }
