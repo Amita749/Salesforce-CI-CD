@@ -11,7 +11,7 @@ pipeline {
         choice(name: 'ACTION', choices: ['DEPLOY','ROLLBACK'], description: 'Choose Deploy or Rollback')
         choice(name: 'BRANCH_NAME', choices: ['feature/dev','feature/new','QA','main'], description: 'Git branch to deploy from')
         choice(name: 'TARGET_ORG', choices: ['Jenkins1', 'Jenkins2'], description: 'Select target Salesforce Org')
-        string(name: 'METADATA', defaultValue: '', description: 'Metadata to deploy (comma separated, e.g., ApexClass:Demo)')
+        string(name: 'METADATA', defaultValue: '', description: 'Metadata to deploy (comma separated, e.g., ApexClass:Demo,CustomSite:Dummy_Portal)')
         string(name: 'ROLLBACK_COMMIT', defaultValue: '', description: 'Commit ID to rollback to (required for rollback)')
         string(name: 'TEST_CLASSES', defaultValue: '', description: 'Comma-separated Apex test classes to run (optional)')
     }
@@ -21,12 +21,12 @@ pipeline {
             steps { deleteDir() }
         }
 
-stage('Check CLI') {
-    steps {
-         echo "🔹 Updating Salesforce CLI..."
-        bat 'sf --version'
-    }
-}
+        stage('Check CLI') {
+            steps {
+                echo "🔹 Salesforce CLI version..."
+                bat 'sf --version'
+            }
+        }
 
         stage('Checkout') {
             steps { git branch: "${params.BRANCH_NAME}", url: "${GIT_URL}" }
@@ -50,17 +50,26 @@ stage('Check CLI') {
         stage('Prepare Manifest') {
             steps {
                 script {
-                    def metadataList = "ApexClass:${params.METADATA}"
+                    // Use METADATA as-is to preserve type (ApexClass, CustomSite, etc.)
+                    def metadataList = params.METADATA?.trim()
+                    if (!metadataList) {
+                        error("No metadata specified for deployment.")
+                    }
+
+                    // Append test classes if provided
                     if (params.TEST_CLASSES?.trim()) {
                         def testClasses = params.TEST_CLASSES.split(',')
                             .collect { it.trim() }
                             .findAll { it }
                             .collect { "ApexClass:${it}" }
                             .join(',')
+
                         if (testClasses) {
                             metadataList += ",${testClasses}"
                         }
                     }
+
+                    echo "🔹 Metadata to deploy: ${metadataList}"
                     bat "sf project generate manifest --metadata \"${metadataList}\" --output-dir manifest"
                 }
             }
@@ -114,52 +123,34 @@ stage('Check CLI') {
                 archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
             }
         }
-
     }
 
     post {
         always {
             echo "🔹 Build Status: ${currentBuild.currentResult}"
             echo "🔹 Action Description: ${currentBuild.description}"
-            // Send email notification
-        emailext(
-    subject: "Jenkins Build ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
-    body: """
-    <html>
-    <body>
-        <h3>Jenkins Build Notification</h3>
-        <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
-            <tr>
-                <th align="left">Job Name</th>
-                <td>${env.JOB_NAME}</td>
-            </tr>
-            <tr>
-                <th align="left">Build Number</th>
-                <td>${env.BUILD_NUMBER}</td>
-            </tr>
-            <tr>
-                <th align="left">Status</th>
-                <td><b>${currentBuild.currentResult}</b></td>
-            </tr>
-            <tr>
-                <th align="left">Action Description</th>
-                <td>${currentBuild.description}</td>
-            </tr>
-            <tr>
-                <th align="left">Build URL</th>
-                <td><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></td>
-            </tr>
-        </table>
-        <p>Regards,<br/>Jenkins CI/CD</p>
-    </body>
-    </html>
-    """,
-    mimeType: 'text/html',
-    to: "amita.chaudhary@dynpro.com",
-    attachmentsPattern: 'test-results/*.txt'  // optional, attach your artifacts
-             )
 
+            emailext(
+                subject: "Jenkins Build ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}",
+                body: """
+                <html>
+                <body>
+                    <h3>Jenkins Build Notification</h3>
+                    <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+                        <tr><th align="left">Job Name</th><td>${env.JOB_NAME}</td></tr>
+                        <tr><th align="left">Build Number</th><td>${env.BUILD_NUMBER}</td></tr>
+                        <tr><th align="left">Status</th><td><b>${currentBuild.currentResult}</b></td></tr>
+                        <tr><th align="left">Action Description</th><td>${currentBuild.description}</td></tr>
+                        <tr><th align="left">Build URL</th><td><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></td></tr>
+                    </table>
+                    <p>Regards,<br/>Jenkins CI/CD</p>
+                </body>
+                </html>
+                """,
+                mimeType: 'text/html',
+                to: "amita.chaudhary@dynpro.com",
+                attachmentsPattern: 'test-results/*.txt'
+            )
         }
-        
     }
 }
