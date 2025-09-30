@@ -1,0 +1,7 @@
+<apex:page showHeader="false" sidebar="false" docType="html-5.0">
+  <apex:pageBlock title="Dummy Site Home">
+    <h1>Welcome to CustomerPortalSite (Dummy)</h1>
+    <p>This Visualforce page is a placeholder for the site's home page.</p>
+    <p>If you need dynamic data later, we can add a controller — for now this is static and public.</p>
+  </apex:pageBlock>
+</apex:page>
