@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SharingRules xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sharingOwnerRules>
+        <fullName>Share_records_with_the_account_manager</fullName>
+        <accessLevel>Read</accessLevel>
+        <label>Share records with the account manager</label>
+        <sharedTo>
+            <role>Account_Managers</role>
+        </sharedTo>
+        <sharedFrom>
+            <role>Account_Managers</role>
+        </sharedFrom>
+    </sharingOwnerRules>
+</SharingRules>
