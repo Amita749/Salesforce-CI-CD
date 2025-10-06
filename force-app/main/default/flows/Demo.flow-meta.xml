@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>64.0</apiVersion>
-    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <environments>Default</environments>
     <interviewLabel>Demo {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Demo</label>
     <processMetadataValues>
@@ -33,16 +30,36 @@
         <connector>
             <targetReference>UpdateRating</targetReference>
         </connector>
-        <getFirstRecordOnly>true</getFirstRecordOnly>
         <object>Account</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+    <recordUpdates>
+        <name>update</name>
+        <label>update</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <filters>
+            <field>Industry</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Chemicals</stringValue>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Rating</field>
+            <value>
+                <stringValue>Cold</stringValue>
+            </value>
+        </inputAssignments>
+        <object>Account</object>
+    </recordUpdates>
     <recordUpdates>
         <name>UpdateRating</name>
         <label>UpdateRating</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
-        <filterLogic>and</filterLogic>
+        <connector>
+            <targetReference>update</targetReference>
+        </connector>
         <filters>
             <field>Type</field>
             <operator>EqualTo</operator>
@@ -58,12 +75,6 @@
         </inputAssignments>
         <object>Account</object>
     </recordUpdates>
-    <start>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <connector>
-            <targetReference>GetRecords</targetReference>
-        </connector>
-    </start>
+    <startElementReference>GetRecords</startElementReference>
     <status>Draft</status>
 </Flow>
