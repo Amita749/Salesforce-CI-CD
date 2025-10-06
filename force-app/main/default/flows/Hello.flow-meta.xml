@@ -3,8 +3,9 @@
     <apiVersion>64.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <assignments>
-        <name>hello</name>
-        <label>hello</label>
+        <description>latest version</description>
+        <name>hello2</name>
+        <label>hello2</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <assignmentItems>
@@ -15,9 +16,10 @@
             </value>
         </assignmentItems>
     </assignments>
+    <description>Latest version</description>
     <environments>Default</environments>
     <interviewLabel>Hello {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>Hello</label>
+    <label>Hello2</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -41,10 +43,10 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>hello</targetReference>
+            <targetReference>hello2</targetReference>
         </connector>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
     <variables>
         <name>EmployeeSalary</name>
         <dataType>Number</dataType>
