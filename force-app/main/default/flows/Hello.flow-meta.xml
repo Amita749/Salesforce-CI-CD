@@ -59,7 +59,7 @@
             <targetReference>hello2</targetReference>
         </connector>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
     <variables>
         <name>EmployeeSalary</name>
         <dataType>Number</dataType>
