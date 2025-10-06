@@ -15,11 +15,14 @@
                 <elementReference>$User.LastName</elementReference>
             </value>
         </assignmentItems>
+        <connector>
+            <targetReference>get_acc</targetReference>
+        </connector>
     </assignments>
     <description>Latest version</description>
     <environments>Default</environments>
     <interviewLabel>Hello {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>Hello2</label>
+    <label>Hello3</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -39,6 +42,16 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>get_acc</name>
+        <label>get acc</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Account</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
     <start>
         <locationX>0</locationX>
         <locationY>0</locationY>
@@ -46,7 +59,7 @@
             <targetReference>hello2</targetReference>
         </connector>
     </start>
-    <status>Active</status>
+    <status>Draft</status>
     <variables>
         <name>EmployeeSalary</name>
         <dataType>Number</dataType>
