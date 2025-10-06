@@ -21,7 +21,6 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
-        <versionNumber>3</versionNumber>
     <recordCreates>
         <name>employeerecord</name>
         <label>employeerecord</label>
