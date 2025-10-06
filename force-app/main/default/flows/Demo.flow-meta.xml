@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <environments>Default</environments>
     <interviewLabel>Demo {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Demo</label>
     <processMetadataValues>
@@ -21,33 +24,25 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
-    <recordCreates>
-        <name>employeerecord</name>
-        <label>employeerecord</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <inputReference>GetRecords</inputReference>
-    </recordCreates>
     <recordLookups>
         <name>GetRecords</name>
         <label>GetRecords</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
         <connector>
             <targetReference>UpdateRating</targetReference>
         </connector>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
         <object>Account</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordUpdates>
         <name>UpdateRating</name>
         <label>UpdateRating</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
-        <connector>
-            <targetReference>employeerecord</targetReference>
-        </connector>
+        <filterLogic>and</filterLogic>
         <filters>
             <field>Type</field>
             <operator>EqualTo</operator>
@@ -63,6 +58,12 @@
         </inputAssignments>
         <object>Account</object>
     </recordUpdates>
-    <startElementReference>GetRecords</startElementReference>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>GetRecords</targetReference>
+        </connector>
+    </start>
     <status>Draft</status>
 </Flow>
