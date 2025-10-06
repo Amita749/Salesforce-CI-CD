@@ -33,10 +33,33 @@
         <object>Account</object>
     </recordLookups>
     <recordUpdates>
+        <name>new_rating_update</name>
+        <label>new rating update</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <filters>
+            <field>Type</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Analyst</stringValue>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Rating</field>
+            <value>
+                <stringValue>Warm</stringValue>
+            </value>
+        </inputAssignments>
+        <object>Account</object>
+    </recordUpdates>
+    <recordUpdates>
         <name>update</name>
         <label>update</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
+        <connector>
+            <targetReference>new_rating_update</targetReference>
+        </connector>
         <filters>
             <field>Industry</field>
             <operator>EqualTo</operator>
