@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>64.0</apiVersion>
-    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
-    <environments>Default</environments>
     <interviewLabel>Demo {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Demo</label>
     <processMetadataValues>
@@ -24,6 +21,20 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
+        <versionNumber>3</versionNumber>
+    <recordCreates>
+        <name>employeerecord</name>
+        <label>employeerecord</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <inputAssignments>
+            <field>Name</field>
+            <value>
+                <elementReference>GetRecords.Name</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Account</object>
+    </recordCreates>
     <recordLookups>
         <name>GetRecords</name>
         <label>GetRecords</label>
@@ -33,16 +44,16 @@
         <connector>
             <targetReference>UpdateRating</targetReference>
         </connector>
-        <getFirstRecordOnly>true</getFirstRecordOnly>
         <object>Account</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordUpdates>
         <name>UpdateRating</name>
         <label>UpdateRating</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
-        <filterLogic>and</filterLogic>
+        <connector>
+            <targetReference>employeerecord</targetReference>
+        </connector>
         <filters>
             <field>Type</field>
             <operator>EqualTo</operator>
@@ -58,12 +69,6 @@
         </inputAssignments>
         <object>Account</object>
     </recordUpdates>
-    <start>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <connector>
-            <targetReference>GetRecords</targetReference>
-        </connector>
-    </start>
-    <status>Active</status>
+    <startElementReference>GetRecords</startElementReference>
+    <status>Draft</status>
 </Flow>
