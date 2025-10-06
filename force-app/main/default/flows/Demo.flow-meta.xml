@@ -26,13 +26,7 @@
         <label>employeerecord</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
-        <inputAssignments>
-            <field>Name</field>
-            <value>
-                <elementReference>GetRecords.Name</elementReference>
-            </value>
-        </inputAssignments>
-        <object>Account</object>
+        <inputReference>GetRecords</inputReference>
     </recordCreates>
     <recordLookups>
         <name>GetRecords</name>
@@ -40,6 +34,7 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
         <connector>
             <targetReference>UpdateRating</targetReference>
         </connector>
