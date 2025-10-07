@@ -16,4 +16,9 @@ public with sharing class InvoiceHandlerTest {
         Integer result = InvoiceHandler.mulNum(50, 10);
         System.assertEquals(500, result, '50*10 should equal 500');
     }
+    @isTest 
+    public static void subInvoiceHandler() {
+        Integer result = InvoiceHandler.subNum(50, 10);
+        System.assertEquals(40, result, '50-10 should equal 40');
+    }
 }
