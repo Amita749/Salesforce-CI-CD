@@ -11,4 +11,9 @@ public with sharing class InvoiceHandlerTest {
         Integer result = InvoiceHandler.addNum(5, 10);
         System.assertEquals(15, result, '5+10 should equal 15');
     }
+    @ISTest 
+    public static void subInvoiceHandler() {
+        Integer result = InvoiceHandler.subNum(50, 10);
+        System.assertEquals(40, result, '50-10 should equal 40');
+    }
 }
