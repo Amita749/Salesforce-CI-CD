@@ -5,7 +5,7 @@ public with sharing class InvoiceHandler {
     public static Integer addNum(Integer a, Integer b) {
      return a+b;
     }
-     public static Integer subNum(Integer a, Integer b) {
-     return a-b;
+     public static Integer mulNum(Integer a, Integer b) {
+     return a*b;
     }
 }
