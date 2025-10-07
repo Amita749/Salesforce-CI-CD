@@ -7,7 +7,7 @@ public with sharing class DemoRecordTest {
         Test.stopTest();
     }
     @IsTest
-    public static void addDemoRecordTest() {
+    public static void subDemoRecordTest() {
         Integer result = DemoRecord.addNum(5, 10);
         System.assertEquals(15, result, '5+10 should equal 15');
     }
