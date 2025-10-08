@@ -93,11 +93,11 @@ pipeline {
                     archiveArtifacts artifacts: 'test-results/validate-output.txt', allowEmptyArchive: false
 
                     if (validateStatus != 0) {
-                        echo "❌ Validation failed."
+                        echo "Validation failed."
                         currentBuild.description = "Validation failed"
                         error("Stopping pipeline because validation failed")
                     } else {
-                        echo "✅ Validation passed, deploying..."
+                        echo "Validation passed, deploying..."
                         def deployStatus = bat(returnStatus: true, script: """
                             sf project deploy start --manifest "${manifestPath}" --target-org ${TARGET_ORG} ${testLevel} --ignore-conflicts  > test-results\\deploy-output.txt
                         """)
@@ -105,11 +105,11 @@ pipeline {
                         archiveArtifacts artifacts: 'test-results/deploy-output.txt', allowEmptyArchive: false
 
                         if (deployStatus != 0) {
-                            echo "❌ Deployment failed."
+                            echo " Deployment failed."
                             currentBuild.description = "Deployment failed"
                             error("Deployment failed")
                         } else {
-                            echo "✅ Deployment successful"
+                            echo "Deployment successful"
                             currentBuild.description = "Deployment successful"
                         }
                     }
