@@ -37,7 +37,8 @@ pipeline {
                 script {
                     def credsMap = [
                         Jenkins1: [consumerCredId: 'JENKINS1_CONSUMER_KEY', user: 'naman.rawat@dynpro.com.jenkins1'],
-                        Jenkins2: [consumerCredId: 'JENKINS2_CONSUMER_KEY', user: 'naman.rawat@dynpro.com.jenkins2']
+                        Jenkins2: [consumerCredId: 'JENKINS2_CONSUMER_KEY', user: 'naman.rawat@dynpro.com.jenkins2'],
+                        PreSales: [consumerCredId: 'PRESALES_CONSUMER_KEY', user: 'naman.rawat@dynpro.com.presales']
                     ]
                     def creds = credsMap[params.TARGET_ORG]
                     withCredentials([string(credentialsId: creds.consumerCredId, variable: 'CONSUMER_KEY')]) {
