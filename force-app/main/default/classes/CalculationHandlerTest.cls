@@ -2,9 +2,9 @@
 @isTest 
 public with sharing class CalculationHandlerTest {
     @isTest
-    public static void testPrintMSG() {
+    public static void testAddNum() {
    Test.startTest();
-   CalculationHandler.printMSG();
+   CalculationHandler.addNum();
    Test.stopTest();
     }
 }
